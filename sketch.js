@@ -1,11 +1,11 @@
-const treeSeedingChance = 0.001
-const treeSpawnChance = 0.25
-const recursiveCallChance = 0.05
+const treeSeedingChance = 0.002
+const treeSpawnChance = 0.12
+const recursiveCallChance = 0.30
+const recallCoeff = 0.4
 
-const gridSize = 100
+const gridSize = 200
 const canvasSize = 800
-const squareSize = 5
-const gapSize = 3
+const squareSize = 4
 
 // Field representation, 0 is nothing, 1 is tree
 let field = []
@@ -39,7 +39,7 @@ let seedTrees = () => {
 }
 
 // Recursively spread trees
-let recursive = (x, y) => {
+let recursive = (x, y, callChance) => {
     // Make changes to temporary field
     let tmp = field;
 
@@ -51,7 +51,7 @@ let recursive = (x, y) => {
             let a = x + i;
             let b = y + j;
             // If the square is within bounds
-            if ((a >= 0 && a < 100) && (b >= 0 && b < 100))
+            if ((a >= 0 && a < gridSize) && (b >= 0 && b < gridSize))
             {
                 // If the square is not a tree
                 if (field[a][b] !== 1)
@@ -61,14 +61,19 @@ let recursive = (x, y) => {
                     {
                         tmp[a][b] = 1
                     }
+                    else
+                    {
+                        tmp[a][b] = 0;
+                    }
                 }
 
                 // Random chance for recursive call on a neighbouring square
                 if (a !== x && b !== y)
                 {
-                    if (Math.random() > (1 - recursiveCallChance))
+                    if (Math.random() > (1 - callChance))
                     {
-                        recursive(a, b)
+                        let chance = callChance * recallCoeff
+                        recursive(a, b, chance)
                     }
                 }
             }
@@ -84,7 +89,7 @@ let runAlgo = () => {
         element.forEach((cell, j) => {
             if (cell === 1)
             {
-                recursive(i, j)
+                recursive(i, j, recursiveCallChance)
             }
         })
     })
@@ -97,13 +102,13 @@ let paintField = () => {
         c.forEach((d, j) => {
             if (d == 0)
             {
-                fill(255)
+                fill(0, 150, 255)
             }
             else
             {
-                fill(0, 255, 30)
+                fill(0, 255, 80)
             }
-            rect(i * (squareSize + gapSize), j * (squareSize + gapSize), squareSize, squareSize)
+            rect(i * squareSize, j * squareSize, squareSize, squareSize)
         })
     })
 }
@@ -123,5 +128,5 @@ var setup = () => {
 // Debugging Tool
 // Displays mouse position in console when clicked
 var mousePressed = () => {
-    console.log(Math.floor(mouseX / 8), Math.floor(mouseY / 8))
+    console.log(Math.floor(mouseX / squareSize), Math.floor(mouseY / squareSize))
 }
